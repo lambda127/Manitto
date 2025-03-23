@@ -3,9 +3,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:manitto/gradient_text.dart';
 import 'package:manitto/choose_manitto.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env"); 
+  await dotenv.load(fileName: ".env");
 
   runApp(const MyApp());
 }
@@ -37,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var _md = ManittoDispenser();
   bool _isLoading = false;
 
   @override
@@ -103,14 +104,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ElevatedButton(
                   onPressed: () {
                     if (!_isLoading) {
-                      var md = ManittoDispenser();
                       debugPrint("pressed");
 
                       setState(() {
                         _isLoading = true;
                       });
 
-                      md.setManitto().then((result) {
+                      _md.setManitto().then((result) {
                         setState(() {
                           _isLoading = false;
                         });
@@ -141,6 +141,38 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
 
                 SizedBox(height: 30),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _md.parseSelectedColumn(0, 1, 2);
+                      },
+                      child: Text(
+                        '멤버 등록',
+                        style: TextStyle(color: Colors.black, fontSize: 10),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor: Colors.white,
+                        shadowColor: Colors.black,
+                        elevation: 2.0,
+                        fixedSize: Size(100, 30),
+                        textStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 15.0,
+                        ),
+                        side: BorderSide(
+                          color: Color.fromARGB(255, 2, 23, 144),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
                 /*
                 Row(

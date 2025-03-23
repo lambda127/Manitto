@@ -61,49 +61,57 @@ class ManittoDispenser {
   var excel = Excel.createExcel();
 
   ManittoDispenser() {
-    parseSelectedColumn(0, 1, 2);
-
     giverQueue = [];
     receiverQueue = [];
     missionQueue = [];
 
     manittoList = [];
-
-    _reset();
-    memberNum = oriMember.length + newMember.length;
   }
 
-
-  void parseSelectedColumn(
+  Future<void> parseSelectedColumn(
     int? nameColumnIndex,
     int? emailColumnIndex,
     int? gradeColumnIndex,
-  ) {
+  ) async {
     String fileName = "member_list.xlsx";
     String dir = Directory.current.path;
-    String filePath = '$dir/$fileName';
-    File? file = File(filePath);
+    File? file;
+
     var bytes = file!.readAsBytesSync();
     var excel = Excel.decodeBytes(bytes);
     var table = excel.tables[excel.tables.keys.first]!;
 
-    memberList =
-        table.rows
-            .skip(1)
-            .map((row) {
-              return Member(
-                name: row[nameColumnIndex!]?.value.toString() ?? '',
-                email: row[emailColumnIndex!]?.value.toString() ?? '',
-                grade: row[gradeColumnIndex!]?.value.toString() ?? '',
-              );
-            })
-            .where(
-              (entry) =>
-                  entry.name.isNotEmpty &&
-                  entry.email.isNotEmpty &&
-                  entry.grade.isNotEmpty,
-            )
-            .toList();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xls', 'xlsx'],
+    );
+
+    if (result != null) {
+      file = File(result.files.single.path!);
+
+      memberList =
+          table.rows
+              .skip(1)
+              .map((row) {
+                return Member(
+                  name: row[nameColumnIndex!]?.value.toString() ?? '',
+                  email: row[emailColumnIndex!]?.value.toString() ?? '',
+                  grade: row[gradeColumnIndex!]?.value.toString() ?? '',
+                );
+              })
+              .where(
+                (entry) =>
+                    entry.name.isNotEmpty &&
+                    entry.email.isNotEmpty &&
+                    entry.grade.isNotEmpty,
+              )
+              .toList();
+    }
+
+    oriMember.addAll(memberList.where((e) => e.grade != '1'));
+    newMember.addAll(memberList.where((e) => e.grade == '1'));
+
+    memberNum = oriMember.length + newMember.length;
   }
 
   void _reset() {
@@ -111,6 +119,8 @@ class ManittoDispenser {
     newMember.clear();
     oriMember.addAll(memberList.where((e) => e.grade != '1'));
     newMember.addAll(memberList.where((e) => e.grade == '1'));
+
+    memberNum = oriMember.length + newMember.length;
   }
 
   /// 마니또 설정
@@ -254,10 +264,8 @@ ${manittoList[i].$1.name}님의 마니또는 ${manittoList[i].$2.name}님입니�
   Future<String?> _saveExcelFile(Excel excel) async {
     String filename = 'Manitto_List.xlsx';
 
-    if (kIsWeb) {
-      var fileBytes = excel.save(fileName: filename);
-    } else {
-      String dir = Directory.current.path;
+    String dir = Directory.current.path;
+    if (dir != null) {
       String filePath = '$dir/$filename';
 
       // Excel 파일 저장
