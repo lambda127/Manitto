@@ -73,13 +73,9 @@ class ManittoDispenser {
     int? emailColumnIndex,
     int? gradeColumnIndex,
   ) async {
-    String fileName = "member_list.xlsx";
-    String dir = Directory.current.path;
+    //String fileName = "member_list.xlsx";
+    //String dir = Directory.current.path;
     File? file;
-
-    var bytes = file!.readAsBytesSync();
-    var excel = Excel.decodeBytes(bytes);
-    var table = excel.tables[excel.tables.keys.first]!;
 
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -88,6 +84,10 @@ class ManittoDispenser {
 
     if (result != null) {
       file = File(result.files.single.path!);
+
+      var bytes = file!.readAsBytesSync();
+      var excel = Excel.decodeBytes(bytes);
+      var table = excel.tables[excel.tables.keys.first]!;
 
       memberList =
           table.rows
